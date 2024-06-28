@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
 #include <assert.h>
+#include <console/console.h>
 #include <fsp/api.h>
 #include <soc/romstage.h>
 #include <soc/meminit.h>
@@ -70,6 +71,13 @@ static void disable_pcie_clock_requests(FSP_M_CONFIG *m_cfg)
 	gpio_configure_pads(clkreq_disabled_table, ARRAY_SIZE(clkreq_disabled_table));
 }
 
+static void custom_fsp_parameters(FSPM_UPD *memupd)
+{
+	memupd->FspmConfig.EnableAbove4GBMmio = 1;
+	memupd->FspmConfig.UnderVoltProtection = 1;
+	memupd->FspmConfig.VmxEnable = 1;
+}
+
 void mainboard_memory_init_params(FSPM_UPD *memupd)
 {
 	memupd->FspmConfig.CpuPcieRpClockReqMsgEnable[0] = CONFIG(PCIEXP_CLK_PM);
@@ -85,13 +93,17 @@ void mainboard_memory_init_params(FSPM_UPD *memupd)
 
 	memupd->FspmConfig.MmioSize = 0xb00; /* 2.75GB in MB */
 
+	memupd->FspmConfig.OcLock = 0;
+	custom_fsp_parameters(memupd);
+
 	if (CONFIG(BOARD_MSI_Z790_P_PRO_WIFI_DDR4))
 		memcfg_init(memupd, &ddr4_mem_config, &dimm_module_spd_info, false);
-	if (CONFIG(BOARD_MSI_Z790_P_PRO_WIFI))
+	if (CONFIG(BOARD_MSI_Z790_P_PRO_WIFI_DDR5))
 		memcfg_init(memupd, &ddr5_mem_config, &dimm_module_spd_info, false);
 
 	gpio_configure_pads(gpio_table, ARRAY_SIZE(gpio_table));
 
 	if (!CONFIG(PCIEXP_CLK_PM))
 		disable_pcie_clock_requests(&memupd->FspmConfig);
+
 }

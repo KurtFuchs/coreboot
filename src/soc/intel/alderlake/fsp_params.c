@@ -673,6 +673,8 @@ static void fill_fsps_tcss_params(FSP_S_CONFIG *s_cfg,
 	 */
 	s_cfg->ITbtConnectTopologyTimeoutInMs = 0;
 
+	s_cfg->Usb4CmMode = CONFIG(SOFTWARE_CONNECTION_MANAGER);
+
 	/* D3Hot and D3Cold for TCSS */
 	s_cfg->D3HotEnable = !config->tcss_d3_hot_disable;
 	s_cfg->D3ColdEnable = CONFIG(D3COLD_SUPPORT);
@@ -781,6 +783,8 @@ static void fill_fsps_sata_params(FSP_S_CONFIG *s_cfg,
 			sizeof(s_cfg->SataPortsEnable));
 		memcpy(s_cfg->SataPortsDevSlp, config->sata_ports_dev_slp,
 			sizeof(s_cfg->SataPortsDevSlp));
+		memcpy(s_cfg->SataPortsHotPlug, config->sata_ports_hotplug,
+		        sizeof(s_cfg->SataPortsHotPlug));
 	}
 
 	/*

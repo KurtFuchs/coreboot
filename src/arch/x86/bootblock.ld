@@ -33,8 +33,8 @@ SECTIONS {
 	BOOTBLOCK_TOP = .;
 	.init (.) : {
 		*(.init._start);
-		*(.init);
-		*(.init.*);
+		KEEP(*(.init));
+		KEEP(*(.init.*));
 	}
 
 	/*
