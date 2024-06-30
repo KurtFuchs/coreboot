@@ -14,29 +14,8 @@ chip soc/intel/tigerlake
 	# CNVi BT enable/disable
 	register "CnviBtCore" = "true"
 
-	register "usb2_ports[0]" = "USB2_PORT_MID(OC3)"		# Type-C Port1
-	register "usb2_ports[1]" = "USB2_PORT_EMPTY"		# M.2 WWAN
-	register "usb2_ports[2]" = "USB2_PORT_MID(OC0)"		# M.2 Bluetooth, USB3/2 Type A Port1
-	register "usb2_ports[3]" = "USB2_PORT_MID(OC3)"		# USB3/2 Type A Port 1
-	register "usb2_ports[4]" = "USB2_PORT_MID(OC3)"		# Type-C Port2
-	register "usb2_ports[5]" = "USB2_PORT_MID(OC3)"		# Type-C Port3 / MECC
-	register "usb2_ports[6]" = "USB2_PORT_EMPTY"		# Not used
-	register "usb2_ports[7]" = "USB2_PORT_EMPTY"		# Not used
-	register "usb2_ports[8]" = "USB2_PORT_EMPTY"		# Not used
-	register "usb2_ports[9]" = "USB2_PORT_MID(OC3)"		# CNVi/BT
-
-	register "usb3_ports[0]" = "USB3_PORT_DEFAULT(OC0)"	# USB3/2 Type A port1
-	register "usb3_ports[1]" = "USB3_PORT_DEFAULT(OC0)"	# USB3/2 Type A port2
-	register "usb3_ports[3]" = "USB3_PORT_DEFAULT(OC3)"	# USB3/USB2 Flex Connector
-
 	# CPU replacement check
 	register "CpuReplacementCheck" = "1"
-
-	# EC host command ranges are in 0x800-0x8ff & 0x200-0x20f
-	register "gen1_dec" = "0x00fc0801"
-	register "gen2_dec" = "0x000c0201"
-	# EC memory map range is 0x900-0x9ff
-	register "gen3_dec" = "0x00fc0901"
 
 	register "PcieRpSlotImplemented[2]" = "1"
 	register "PcieRpSlotImplemented[3]" = "1"
@@ -132,14 +111,6 @@ chip soc/intel/tigerlake
 		.tdp_pl4 = 83,
 	}"
 
-	#HD Audio
-	register "PchHdaDspEnable" = "1"
-	register "PchHdaAudioLinkDmicEnable[0]" = "1"
-	register "PchHdaAudioLinkDmicEnable[1]" = "1"
-	register "PchHdaAudioLinkSspEnable[0]" = "1"
-	register "PchHdaAudioLinkSspEnable[2]" = "1"
-	register "PchHdaAudioLinkSndwEnable[0]" = "1"
-
 	# Intel Common SoC Config
 	register "common_soc_config" = "{
 		.gspi[1] = {
@@ -215,7 +186,26 @@ chip soc/intel/tigerlake
 		end
 		device ref gspi2 off end
 		device ref gspi3 off end
-		device ref south_xhci on  end
+		device ref south_xhci on
+			register "usb2_ports" = "{
+				[0] = USB2_PORT_MID(OC3),	// Type-C Port1
+				[1] = USB2_PORT_EMPTY,		// M.2 WWAN
+				[2] = USB2_PORT_MID(OC0),	// M.2 Bluetooth, USB3/2 Type A Port1
+				[3] = USB2_PORT_MID(OC3),	// USB3/2 Type A Port 1
+				[4] = USB2_PORT_MID(OC3),	// Type-C Port2
+				[5] = USB2_PORT_MID(OC3),	// Type-C Port3 / MECC
+				[6] = USB2_PORT_EMPTY,		// Not used
+				[7] = USB2_PORT_EMPTY,		// Not used
+				[8] = USB2_PORT_EMPTY,		// Not used
+				[9] = USB2_PORT_MID(OC3),	// CNVi/BT
+			}"
+
+			register "usb3_ports" = "{
+				[0] = USB3_PORT_DEFAULT(OC0),	// USB3/2 Type A port1
+				[1] = USB3_PORT_DEFAULT(OC0),	// USB3/2 Type A port2
+				[3] = USB3_PORT_DEFAULT(OC3),	// USB3/USB2 Flex Connector
+			}"
+		end
 		device ref south_xdci on  end
 		device ref shared_ram on  end
 		device ref cnvi_wifi on
@@ -304,6 +294,12 @@ chip soc/intel/tigerlake
 			end
 		end
 		device ref pch_espi on
+			# EC host command ranges are in 0x800-0x8ff & 0x200-0x20f
+			register "gen1_dec" = "0x00fc0801"
+			register "gen2_dec" = "0x000c0201"
+			# EC memory map range is 0x900-0x9ff
+			register "gen3_dec" = "0x00fc0901"
+
 			chip ec/google/chromeec
 				use conn0 as mux_conn[0]
 				use conn1 as mux_conn[1]
@@ -333,7 +329,18 @@ chip soc/intel/tigerlake
 				end
 			end
 		end
-		device ref hda on  end
+		device ref hda on
+			register "PchHdaDspEnable" = "1"
+			register "PchHdaAudioLinkDmicEnable" = "{
+				[0] = 1,
+				[1] = 1,
+			}"
+			register "PchHdaAudioLinkSspEnable" = "{
+				[0] = 1,
+				[2] = 1,
+			}"
+			register "PchHdaAudioLinkSndwEnable[0]" = "1"
+		end
 		device ref smbus on  end
 		device ref fast_spi on  end
 		device ref gbe off end
