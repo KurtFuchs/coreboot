@@ -94,10 +94,15 @@ help_coreboot help::
 	@echo  '  sphinx                - Build sphinx documentation for coreboot'
 	@echo  '  sphinx-lint           - Build sphinx documentation for coreboot with warnings as errors'
 	@echo  '  filelist              - Show files used in current build'
-	@echo  '  printall              - print makefile info for debugging'
-	@echo  '  gitconfig             - set up git to submit patches to coreboot'
-	@echo  '  ctags / ctags-project - make ctags file for all of coreboot or current board'
-	@echo  '  cscope / cscope-project - make cscope.out file for coreboot or current board'
+	@echo  '  printall              - Print makefile info for debugging'
+	@echo  '  gitconfig             - Set up git to submit patches to coreboot'
+	@echo  '  ctags / ctags-project - Make ctags file for all of coreboot or current board'
+	@echo  '  cscope / cscope-project - Make cscope.out file for coreboot or current board'
+	@echo
+	@echo  '*** site-local related targets ***'
+	@echo  '  symlink               - Create symbolic links from site-local into coreboot tree'
+	@echo  '  clean-symlink         - Remove symbolic links created by "make symlink"'
+	@echo  '  cleanall-symlink      - Remove all symbolic links in the coreboot tree'
 	@echo
 
 # This include must come _before_ the pattern rules below!
@@ -519,11 +524,35 @@ symlink:
 	done
 
 clean-symlink:
-	@echo "Deleting symbolic link";\
-	EXISTING_SYMLINKS=`find -L ./src -xtype l | grep -v 3rdparty`; \
-	for link in $$EXISTING_SYMLINKS; do \
-		echo -e "\tUNLINK $$link"; \
-		rm "$$link"; \
+	if [ -z "$(SYMLINK_LIST)" ]; then \
+		echo "No site-local symbolic links to clean."; \
+		exit 0; \
+	fi; \
+	echo "Removing site-local symbolic links from tree.."; \
+	for link in $(SYMLINK_LIST); do \
+		SYMLINK="$(top)/$$(head -n 1 "$${link}")"; \
+		if [ "$${SYMLINK}" = "$$(echo "$${SYMLINK}" | sed "s|^$(top)||")" ]; then \
+			echo "  FAILED: $${SYMLINK} is outside of current directory." >&2; \
+			continue; \
+		elif [ ! -L "$${SYMLINK}" ]; then \
+			echo "  $${SYMLINK} does not exist - skipping"; \
+			continue; \
+		fi; \
+		if [ -L "$${SYMLINK}" ]; then \
+			REALDIR="$$(realpath "$${link}")"; \
+			echo "  UNLINK $${link} (linked from $${REALDIR})"; \
+			rm "$${SYMLINK}"; \
+		fi; \
+	done; \
+	EXISTING_SYMLINKS="$$(find $(top) -type l | grep -v "3rdparty\|crossgcc" )"; \
+	if [ -z "$${EXISTING_SYMLINKS}" ]; then \
+		echo "  No remaining symbolic links found in tree."; \
+	else \
+		echo "  Remaining symbolic links found:"; \
+		for link in $${EXISTING_SYMLINKS}; do \
+			echo "    $${link}"; \
+		done; \
+	fi
 
 cleanall-symlink:
 	echo "Deleting all symbolic links in the coreboot tree (excluding 3rdparty & crossgcc)"; \
