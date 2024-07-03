@@ -861,23 +861,8 @@ int cse_hmrfpo_get_status(void)
 	return resp.status;
 }
 
-void print_me_fw_version(void *unused)
-{
-	struct me_fw_ver_resp resp = {0};
-
-	/* Ignore if UART debugging is disabled */
-	if (!CONFIG(CONSOLE_SERIAL))
-		return;
-
-	if (get_me_fw_version(&resp) == CB_SUCCESS) {
-		printk(BIOS_DEBUG, "ME: Version: %d.%d.%d.%d\n", resp.code.major,
-			resp.code.minor, resp.code.hotfix, resp.code.build);
-		return;
-	}
-	printk(BIOS_DEBUG, "ME: Version: Unavailable\n");
-}
-
-enum cb_err get_me_fw_version(struct me_fw_ver_resp *resp)
+/* Queries and gets ME firmware version */
+static enum cb_err get_me_fw_version(struct me_fw_ver_resp *resp)
 {
 	const struct mkhi_hdr fw_ver_msg = {
 		.group_id = MKHI_GROUP_ID_GEN,
@@ -892,13 +877,6 @@ enum cb_err get_me_fw_version(struct me_fw_ver_resp *resp)
 
 	/* Ignore if CSE is disabled */
 	if (!is_cse_enabled())
-		return CB_ERR;
-
-	/*
-	 * Ignore if ME Firmware SKU type is Lite since
-	 * print_boot_partition_info() logs RO(BP1) and RW(BP2) versions.
-	 */
-	if (cse_is_hfs3_fw_sku_lite())
 		return CB_ERR;
 
 	/*
@@ -922,6 +900,29 @@ enum cb_err get_me_fw_version(struct me_fw_ver_resp *resp)
 
 
 	return CB_SUCCESS;
+}
+
+void print_me_fw_version(void *unused)
+{
+	struct me_fw_ver_resp resp = {0};
+
+	/* Ignore if UART debugging is disabled */
+	if (!CONFIG(CONSOLE_SERIAL))
+		return;
+
+	/*
+	 * Skip if ME firmware is Lite SKU, as RO/RW versions are
+	 * already logged by `cse_print_boot_partition_info()`
+	 */
+	if (cse_is_hfs3_fw_sku_lite())
+		return;
+
+	if (get_me_fw_version(&resp) == CB_SUCCESS) {
+		printk(BIOS_DEBUG, "ME: Version: %d.%d.%d.%d\n", resp.code.major,
+			resp.code.minor, resp.code.hotfix, resp.code.build);
+		return;
+	}
+	printk(BIOS_DEBUG, "ME: Version: Unavailable\n");
 }
 
 void cse_trigger_vboot_recovery(enum csme_failure_reason reason)
@@ -1418,6 +1419,9 @@ void cse_late_finalize(void)
 
 static void intel_cse_get_rw_version(void)
 {
+	if (CONFIG(SOC_INTEL_CSE_LITE_SYNC_BY_PAYLOAD))
+		return;
+
 	struct cse_specific_info *info = cbmem_find(CBMEM_ID_CSE_INFO);
 	if (info == NULL)
 		return;

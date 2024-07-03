@@ -90,6 +90,13 @@ show_coreboot: | files_added
 .PHONY: show_notices
 show_notices:: | show_coreboot
 
+# This rule allows the site-local makefile to run before starting the actual
+# coreboot build. It should not be used in the regular coreboot makefiles.
+# Note: This gets run after the immediate makefile code like updating the
+# submodules, but before any other targets.
+.PHONY: site-local-target
+site-local-target::
+
 #######################################################################
 # our phony targets
 PHONY+= clean-abuild coreboot check-style build_complete
@@ -528,7 +535,6 @@ CFLAGS_common += -fno-pie
 CFLAGS_common += -Wstring-compare
 ifeq ($(CONFIG_COMPILER_GCC),y)
 CFLAGS_common += -Wold-style-declaration
-CFLAGS_common += -Walloc-size
 CFLAGS_common += -Wcast-function-type
 # Don't add these GCC specific flags when running scan-build
 ifeq ($(CCC_ANALYZER_OUTPUT_FORMAT),)
