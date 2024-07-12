@@ -271,18 +271,22 @@ static void cse_print_boot_partition_info(void)
 
 	/* Log version info of RO & RW partitions */
 	cse_bp = cse_get_bp_entry(RO);
-	printk(BIOS_DEBUG, "cse_lite: %s version = %d.%d.%d.%d (Status=0x%x, Start=0x%x, End=0x%x)\n",
+	if (cse_bp->status == BP_STATUS_SUCCESS)
+		printk(BIOS_DEBUG, "cse_lite: %s version = %d.%d.%d.%d (Start=0x%x, End=0x%x)\n",
 			GET_BP_STR(RO), cse_bp->fw_ver.major, cse_bp->fw_ver.minor,
 			cse_bp->fw_ver.hotfix, cse_bp->fw_ver.build,
-			cse_bp->status, cse_bp->start_offset,
-			cse_bp->end_offset);
+			cse_bp->start_offset, cse_bp->end_offset);
+	else
+		printk(BIOS_ERR, "cse_lite: %s status=0x%x\n", GET_BP_STR(RO), cse_bp->status);
 
 	cse_bp = cse_get_bp_entry(RW);
-	printk(BIOS_DEBUG, "cse_lite: %s version = %d.%d.%d.%d (Status=0x%x, Start=0x%x, End=0x%x)\n",
+	if (cse_bp->status == BP_STATUS_SUCCESS)
+		printk(BIOS_DEBUG, "cse_lite: %s version = %d.%d.%d.%d (Start=0x%x, End=0x%x)\n",
 			GET_BP_STR(RW), cse_bp->fw_ver.major, cse_bp->fw_ver.minor,
 			cse_bp->fw_ver.hotfix, cse_bp->fw_ver.build,
-			cse_bp->status, cse_bp->start_offset,
-			cse_bp->end_offset);
+			cse_bp->start_offset, cse_bp->end_offset);
+	else
+		printk(BIOS_ERR, "cse_lite: %s status=0x%x\n", GET_BP_STR(RW), cse_bp->status);
 }
 
 /*
@@ -1541,31 +1545,6 @@ static void store_ish_version(void)
 		}
 	}
 }
-
-static void preram_create_cbmem_cse_info(int is_recovery)
-{
-	if (!CONFIG(SOC_INTEL_CSE_LITE_SYNC_BY_PAYLOAD))
-		return;
-
-	/*
-	 * CBMEM_ID_CSE_INFO will be used by the payload to -
-	 * 1. Avoid reading ISH firmware version on consecutive boots.
-	 * 2. Track state of PSR data during CSE downgrade operation.
-	 */
-	void *temp = cbmem_add(CBMEM_ID_CSE_INFO, sizeof(struct cse_specific_info));
-	if (!temp)
-		printk(BIOS_ERR, "cse_lite: Couldn't create CBMEM_ID_CSE_INFO\n");
-
-	/*
-	 * CBMEM_ID_CSE_BP_INFO will be used by the payload to avoid reading CSE
-	 * boot partition information on consecutive boots.
-	 */
-	temp = cbmem_add(CBMEM_ID_CSE_BP_INFO, sizeof(struct get_bp_info_rsp));
-	if (!temp)
-		printk(BIOS_ERR, "cse_lite: Couldn't create CBMEM_ID_CSE_BP_INFO\n");
-}
-
-CBMEM_CREATION_HOOK(preram_create_cbmem_cse_info);
 
 static void ramstage_cse_misc_ops(void *unused)
 {
