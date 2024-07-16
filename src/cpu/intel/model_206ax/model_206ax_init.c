@@ -11,6 +11,7 @@
 #include <cpu/intel/turbo.h>
 #include <cpu/x86/cache.h>
 #include <cpu/x86/name.h>
+#include "commonlib/bsd/helpers.h"
 #include "model_206ax.h"
 #include "chip.h"
 #include <cpu/intel/smm_reloc.h>
@@ -141,6 +142,10 @@ void set_power_limits(u8 power_limit_1_time)
 		/* Set long term power limit to TDP */
 		limit.lo |= tdp & PKG_POWER_LIMIT_MASK;
 	}
+	if (conf->pl2_clamp) {
+		printk(BIOS_DEBUG, "Enabling PL1 clamping limitation\n");
+		limit.lo |= PKG_POWER_LIMIT_CLAMP;
+	}
 	limit.lo |= PKG_POWER_LIMIT_EN;
 	limit.lo |= (power_limit_1_val & PKG_POWER_LIMIT_TIME_MASK) <<
 		PKG_POWER_LIMIT_TIME_SHIFT;
@@ -152,6 +157,10 @@ void set_power_limits(u8 power_limit_1_time)
 	} else {
 		/* Set short term power limit to 1.25 * TDP */
 		limit.hi |= ((tdp * 125) / 100) & PKG_POWER_LIMIT_MASK;
+	}
+	if (conf->pl2_clamp) {
+		printk(BIOS_DEBUG, "Enabling PL2 clamping limitation\n");
+		limit.hi |= PKG_POWER_LIMIT_CLAMP;
 	}
 	limit.hi |= PKG_POWER_LIMIT_EN;
 	/* Power limit 2 time is only programmable on SNB EP/EX */
@@ -165,6 +174,23 @@ void set_power_limits(u8 power_limit_1_time)
 		limit.lo = msr.lo & 0xff;
 		wrmsr(MSR_TURBO_ACTIVATION_RATIO, limit);
 	}
+}
+
+static void configure_turbo_ratio_limits(struct cpu_intel_model_206ax_config *conf)
+{
+	msr_t msr = rdmsr(MSR_TURBO_RATIO_LIMIT);
+
+	for (int i = 0; i < ARRAY_SIZE(conf->turbo_limits.raw); i++) {
+		const int shift = i * 8;
+		const int limit = conf->turbo_limits.raw[i];
+
+		if (limit) {
+			msr.lo &= ~(0xff << shift);
+			msr.lo |= (limit << shift);
+		}
+	}
+
+	wrmsr(MSR_TURBO_RATIO_LIMIT, msr);
 }
 
 static void configure_c_states(struct device *dev)
@@ -289,6 +315,14 @@ static void configure_c_states(struct device *dev)
 		}
 		msr.lo |= PP1_CURRENT_LIMIT_LOCK;
 		wrmsr(MSR_PP1_CURRENT_CONFIG, msr);
+	}
+
+	msr = rdmsr(MSR_PLATFORM_INFO);
+	if (msr.lo & PLATFORM_INFO_SET_TURBO_LIMIT) {
+		configure_turbo_ratio_limits(conf);
+	} else {
+		printk(BIOS_INFO, "%s: Programmable ratio limit for turbo mode is disabled\n",
+		       dev_path(dev));
 	}
 }
 

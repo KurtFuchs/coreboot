@@ -60,6 +60,8 @@ struct dsm_profile {
 	uint32_t enablement_11ax;
 	uint32_t unii_4;
 	uint32_t enablement_11be;
+	uint32_t energy_detection_threshold;
+	uint32_t rfi_mitigation;
 };
 
 struct bsar_profile {
