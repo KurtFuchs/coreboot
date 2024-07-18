@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
-#ifndef _SOC_METEORLAKE_ESPI_H_
-#define _SOC_METEORLAKE_ESPI_H_
+#ifndef _INTELPCH_ESPI_H_
+#define _INTELPCH_ESPI_H_
 
 /* PCI Configuration Space (D31:F0): ESPI */
 #define SCI_IRQ_SEL		(7 << 0)
@@ -24,4 +24,4 @@
 #define PCCTL			0xE0 /* PCI Clock Control */
 #define   CLKRUN_EN		(1 << 0)
 
-#endif
+#endif /* _INTELPCH_ESPI_H_ */
