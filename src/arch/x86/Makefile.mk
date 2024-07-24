@@ -54,12 +54,9 @@ endif # CONFIG_SOC_AMD_COMMON_BLOCK_LPC_SPI_DMA
 # common support for early assembly includes
 ###############################################################################
 
-define early_x86_stage
+define x86_stage
 # $1 stage name
 # $2 oformat
-
-# The '.' include path is needed for the generated assembly.inc file.
-$(1)-S-ccopts += -I.
 
 $$(objcbfs)/$(1).debug: $$$$($(1)-libs) $$$$($(1)-objs)
 	@printf "    LINK       $$(subst $$(obj)/,,$$(@))\n"
@@ -95,9 +92,9 @@ bootblock-y += car.ld
 $(call src-to-obj,bootblock,$(dir)/id.S): $(obj)/build.h
 
 ifeq ($(CONFIG_ARCH_BOOTBLOCK_X86_32),y)
-$(eval $(call early_x86_stage,bootblock,elf32-i386))
+$(eval $(call x86_stage,bootblock,elf32-i386))
 else
-$(eval $(call early_x86_stage,bootblock,elf64-x86-64))
+$(eval $(call x86_stage,bootblock,elf64-x86-64))
 endif
 
 ifeq ($(CONFIG_BOOTBLOCK_IN_CBFS),y)
@@ -148,9 +145,9 @@ verstage-y += car.ld
 verstage-libs ?=
 
 ifeq ($(CONFIG_ARCH_VERSTAGE_X86_32),y)
-$(eval $(call early_x86_stage,verstage,elf32-i386))
+$(eval $(call x86_stage,verstage,elf32-i386))
 else
-$(eval $(call early_x86_stage,verstage,elf64-x86-64))
+$(eval $(call x86_stage,verstage,elf64-x86-64))
 endif
 
 endif # CONFIG_ARCH_VERSTAGE_X86_32 / CONFIG_ARCH_VERSTAGE_X86_64
@@ -187,9 +184,9 @@ romstage-srcs += $(wildcard $(src)/mainboard/$(MAINBOARDDIR)/romstage.c)
 romstage-libs ?=
 
 ifeq ($(CONFIG_ARCH_ROMSTAGE_X86_32),y)
-$(eval $(call early_x86_stage,romstage,elf32-i386))
+$(eval $(call x86_stage,romstage,elf32-i386))
 else
-$(eval $(call early_x86_stage,romstage,elf64-x86-64))
+$(eval $(call x86_stage,romstage,elf64-x86-64))
 endif
 
 # Compiling crt0 with -g seems to trigger https://sourceware.org/bugzilla/show_bug.cgi?id=6428
@@ -228,9 +225,11 @@ postcar-$(CONFIG_HAVE_CF9_RESET) += cf9_reset.c
 
 LDFLAGS_postcar += -Map $(objcbfs)/postcar.map
 
-$(objcbfs)/postcar.debug: $$(postcar-objs)
-	@printf "    LINK       $(subst $(obj)/,,$(@))\n"
-	$(LD_postcar) $(LDFLAGS_postcar) -o $@ -L$(obj) $(COMPILER_RT_FLAGS_postcar) --whole-archive --start-group $(filter-out %.ld,$^) --no-whole-archive $(COMPILER_RT_postcar) --end-group -T $(call src-to-obj,postcar,$(CONFIG_MEMLAYOUT_LD_FILE))
+ifeq ($(CONFIG_ARCH_POSTCAR_X86_32),y)
+$(eval $(call x86_stage,postcar,elf32-i386))
+else
+$(eval $(call x86_stage,postcar,elf64-x86-64))
+endif
 
 $(objcbfs)/postcar.elf: $(objcbfs)/postcar.debug.rmod
 	cp $< $@
@@ -288,11 +287,9 @@ rmodules_x86_64-y += memset.c
 
 ifeq ($(CONFIG_ARCH_RAMSTAGE_X86_32),y)
 target-objcopy=-O elf32-i386 -B i386
-LD_MACHINE =-m elf_i386
 endif
 ifeq ($(CONFIG_ARCH_RAMSTAGE_X86_64),y)
 target-objcopy=-O elf64-x86-64 -B i386:x86-64
-LD_MACHINE =-m elf_x86_64
 endif
 
 # Make sure generated code does not use XMMx and MMx registers
@@ -311,17 +308,14 @@ endif
 
 ramstage-libs ?=
 
-# The rmodule_link definition creates an elf file with .rmod extension.
+ifeq ($(CONFIG_ARCH_RAMSTAGE_X86_32),y)
+$(eval $(call x86_stage,ramstage,elf32-i386))
+else
+$(eval $(call x86_stage,ramstage,elf64-x86-64))
+endif
+
 $(objcbfs)/ramstage.elf: $(objcbfs)/ramstage.debug.rmod
 	cp $< $@
-
-$(objcbfs)/ramstage.debug: $(objgenerated)/ramstage.o $(call src-to-obj,ramstage,$(CONFIG_MEMLAYOUT_LD_FILE))
-	@printf "    CC         $(subst $(obj)/,,$(@))\n"
-	$(LD_ramstage) $(LDFLAGS_ramstage) -o $@ -L$(obj) $< -T $(call src-to-obj,ramstage,$(CONFIG_MEMLAYOUT_LD_FILE))
-
-$(objgenerated)/ramstage.o: $$(ramstage-objs) $(COMPILER_RT_ramstage) $$(ramstage-libs)
-	@printf "    CC         $(subst $(obj)/,,$(@))\n"
-	$(LD_ramstage) $(LD_MACHINE) -r -o $@ $(COMPILER_RT_FLAGS_ramstage) --whole-archive --start-group $(filter-out %.ld,$(ramstage-objs)) $(ramstage-libs) --no-whole-archive $(COMPILER_RT_ramstage) --end-group
 
 endif # CONFIG_ARCH_RAMSTAGE_X86_32 / CONFIG_ARCH_RAMSTAGE_X86_64
 
