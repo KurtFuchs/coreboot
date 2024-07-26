@@ -1,8 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
 #include <acpi/acpi.h>
+#include <boot/coreboot_tables.h>
+#include <bootstate.h>
 #include <cpu/x86/msr.h>
 #include <device/device.h>
+#include <fsp/util.h>
+#include <gpio.h>
 #include <soc/pci_devs.h>
 #include <soc/ramstage.h>
 #include <smbios.h>
@@ -10,7 +14,7 @@
 #include <superio/nuvoton/nct6687d/nct6687d.h>
 
 
-#define MSR_ATOM_TURBO_RATIO_LIMIT			0x650
+#define MSR_ATOM_TURBO_RATIO_LIMIT		0x650
 #define MSR_ATOM_TURBO_RATIO_LIMIT_CORES	0x651
 #define MSR_BIGCORE_TURBO_RATIO_LIMIT		0x1ad
 #define MSR_BIGCORE_TURBO_RATIO_LIMIT_CORES	0x1ae
