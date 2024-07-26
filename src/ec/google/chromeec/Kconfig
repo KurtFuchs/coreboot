@@ -104,51 +104,16 @@ config EC_GOOGLE_CHROMEEC_SKUID
 	help
 	  Provides common routine for reporting the skuid to ChromeOS.
 
-config EC_GOOGLE_CHROMEEC_BOARDNAME
-	string "Chrome EC board name for EC"
-	default ""
-	help
-	  The board name used in the Chrome EC code base to build
-	  the EC firmware.  If set, the coreboot build with also
-	  build the EC firmware and add it to the image.
-
-config EC_GOOGLE_CHROMEEC_PD_BOARDNAME
-	depends on EC_GOOGLE_CHROMEEC_PD
-	string "Chrome EC board name for PD"
-	default ""
-	help
-	  The board name used in the Chrome EC code base to build
-	  the PD firmware.  If set, the coreboot build with also
-	  build the EC firmware and add it to the image.
-
 config EC_GOOGLE_CHROMEEC_RTC
 	bool "Enable ChromeOS EC RTC"
 	help
 	  Enable support for the real-time clock on the ChromeOS EC. This
 	  uses the EC_CMD_RTC_GET_VALUE command to read the current time.
 
-choice
-	prompt "Chrome EC firmware source"
-	default EC_GOOGLE_CHROMEEC_FIRMWARE_BUILTIN if EC_GOOGLE_CHROMEEC_BOARDNAME != ""
-	default EC_GOOGLE_CHROMEEC_FIRMWARE_NONE
-
-	config EC_GOOGLE_CHROMEEC_FIRMWARE_NONE
-	bool "No EC firmware is included"
+config EC_GOOGLE_CHROMEEC_FIRMWARE_EXTERNAL
+	bool "Include an external EC firmware binary"
 	help
-	  Disable building and including any EC firmware in the image.
-
-	config EC_GOOGLE_CHROMEEC_FIRMWARE_EXTERNAL
-	bool "External EC firmware is included"
-	help
-	  Include EC firmware binary in the image from an external source.
-	  It is expected to be built externally.
-
-	config EC_GOOGLE_CHROMEEC_FIRMWARE_BUILTIN
-	bool "Builtin EC firmware is included"
-	help
-	  Build and include EC firmware binary in the image.
-
-endchoice
+	  Include a precompiled EC firmware binary in the image.
 
 config EC_GOOGLE_CHROMEEC_FIRMWARE_FILE
 	string "Chrome EC firmware path and filename"
@@ -156,29 +121,11 @@ config EC_GOOGLE_CHROMEEC_FIRMWARE_FILE
 	help
 	  The path and filename of the EC firmware file to use.
 
-choice
-	prompt "Chrome EC firmware source for PD"
+config EC_GOOGLE_CHROMEEC_PD_FIRMWARE_EXTERNAL
+	bool "Include an external PD firmware binary"
 	depends on EC_GOOGLE_CHROMEEC_PD
-	default EC_GOOGLE_CHROMEEC_PD_FIRMWARE_BUILTIN if EC_GOOGLE_CHROMEEC_PD_BOARDNAME != ""
-	default EC_GOOGLE_CHROMEEC_PD_FIRMWARE_NONE
-
-	config EC_GOOGLE_CHROMEEC_PD_FIRMWARE_NONE
-	bool "No PD firmware is included"
 	help
-	  Disable building and including any PD firmware in the image.
-
-	config EC_GOOGLE_CHROMEEC_PD_FIRMWARE_EXTERNAL
-	bool "External PD firmware is included"
-	help
-	  Include PD firmware binary in the image from an external source.
-	  It is expected to be built externally.
-
-	config EC_GOOGLE_CHROMEEC_PD_FIRMWARE_BUILTIN
-	bool "Builtin PD firmware is included"
-	help
-	  Build and include PD firmware binary in the image.
-
-endchoice
+	  Include a precompiled PD firmware binary in the image.
 
 config EC_GOOGLE_CHROMEEC_PD_FIRMWARE_FILE
 	string "Chrome EC firmware path and filename for PD"
