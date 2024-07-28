@@ -1,8 +1,6 @@
 [submodule "3rdparty/blobs"]
 	path = 3rdparty/blobs
 	url = https://review.coreboot.org/blobs.git
-	update = none
-	ignore = dirty
 [submodule "util/nvidia-cbootimage"]
 	path = util/nvidia/cbootimage
 	url = https://review.coreboot.org/nvidia-cbootimage.git
@@ -22,16 +20,12 @@
 [submodule "3rdparty/fsp"]
 	path = 3rdparty/fsp
 	url = https://review.coreboot.org/fsp.git
-	update = none
-	ignore = dirty
 [submodule "opensbi"]
 	path = 3rdparty/opensbi
 	url = https://review.coreboot.org/opensbi.git
 [submodule "intel-microcode"]
 	path = 3rdparty/intel-microcode
 	url = https://review.coreboot.org/intel-microcode.git
-	update = none
-	ignore = dirty
 	branch = main
 [submodule "3rdparty/ffs"]
 	path = 3rdparty/ffs
@@ -39,18 +33,13 @@
 [submodule "3rdparty/amd_blobs"]
 	path = 3rdparty/amd_blobs
 	url = https://review.coreboot.org/amd_blobs
-	update = none
-	ignore = dirty
 [submodule "3rdparty/cmocka"]
 	path = 3rdparty/cmocka
 	url = https://review.coreboot.org/cmocka.git
-	update = none
 	branch = stable-1.1
 [submodule "3rdparty/qc_blobs"]
 	path = 3rdparty/qc_blobs
 	url = https://review.coreboot.org/qc_blobs.git
-	update = none
-	ignore = dirty
 [submodule "3rdparty/intel-sec-tools"]
 	path = 3rdparty/intel-sec-tools
 	url = https://review.coreboot.org/9esec-security-tooling.git
