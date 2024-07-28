@@ -48,9 +48,6 @@ config MAINBOARD_FAMILY
 config MAINBOARD_VERSION
 	default "2.0" if BOARD_MSI_Z790_P_PRO_WIFI_DDR5
 
-config DIMM_SPD_SIZE
-	default 512
-
 config UART_FOR_CONSOLE
 	default 0
 
