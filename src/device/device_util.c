@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 
+#include <assert.h>
 #include <commonlib/bsd/helpers.h>
 #include <console/console.h>
 #include <device/device.h>
@@ -108,7 +109,7 @@ u32 dev_path_encode(const struct device *dev)
 		ret |= dev->path.apic.apic_id;
 		break;
 	case DEVICE_PATH_DOMAIN:
-		ret |= dev->path.domain.domain;
+		ret |= dev->path.domain.domain_id;
 		break;
 	case DEVICE_PATH_CPU_CLUSTER:
 		ret |= dev->path.cpu_cluster.cluster;
@@ -192,7 +193,7 @@ const char *dev_path(const struct device *dev)
 			break;
 		case DEVICE_PATH_DOMAIN:
 			snprintf(buffer, sizeof(buffer), "DOMAIN: %08x",
-				dev->path.domain.domain);
+				dev->path.domain.domain_id);
 			break;
 		case DEVICE_PATH_CPU_CLUSTER:
 			snprintf(buffer, sizeof(buffer), "CPU_CLUSTER: %01x",
@@ -261,9 +262,23 @@ const struct device *dev_get_domain(const struct device *dev)
 	return NULL;
 }
 
+unsigned int dev_get_domain_id(const struct device *dev)
+{
+	const struct device *domain_dev = dev_get_domain(dev);
+
+	assert(domain_dev);
+
+	if (!domain_dev) {
+		printk(BIOS_ERR, "%s: doesn't have a domain device\n", dev_path(dev));
+		return 0;
+	}
+
+	return domain_dev->path.domain.domain_id;
+}
+
 bool is_domain0(const struct device *dev)
 {
-	return dev && dev->path.type == DEVICE_PATH_DOMAIN && dev->path.domain.domain == 0;
+	return dev && dev->path.type == DEVICE_PATH_DOMAIN && dev->path.domain.domain_id == 0;
 }
 
 bool is_dev_on_domain0(const struct device *dev)

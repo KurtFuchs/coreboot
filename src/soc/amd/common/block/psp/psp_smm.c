@@ -11,18 +11,28 @@
 
 #include "psp_def.h"
 
-#define C2P_BUFFER_MAXSIZE 0xc00 /* Core-to-PSP buffer */
-#define P2C_BUFFER_MAXSIZE 0xc00 /* PSP-to-core buffer */
-
+/*
+ * When sending PSP mailbox commands to the PSP from the SMI handler after the boot done
+ * command was sent, the corresponding data buffer needs to be placed in this core to PSP (C2P)
+ * buffer.
+ */
 struct {
 	u8 buffer[C2P_BUFFER_MAXSIZE];
 } __aligned(32) c2p_buffer;
 
+/*
+ * When the PSP sends mailbox commands to the host, it will update the PSP to core (P2C) buffer
+ * and then send an SMI to the host to process the request.
+ */
 struct {
 	u8 buffer[P2C_BUFFER_MAXSIZE];
 } __aligned(32) p2c_buffer;
 
-static uint32_t smm_flag; /* Non-zero for SMM, clear when not */
+/*
+ * When sending PSP mailbox commands to the PSP from the SMI handler, the SMM flag needs to be
+ * set for the PSP to accept it. Otherwise it should be cleared.
+ */
+static uint32_t smm_flag;
 
 static void set_smm_flag(void)
 {
@@ -34,6 +44,24 @@ static void clear_smm_flag(void)
 	smm_flag = 0;
 }
 
+static int send_psp_command_smm(u32 command, void *buffer)
+{
+	int cmd_status;
+
+	set_smm_flag();
+	cmd_status = send_psp_command(command, buffer);
+	clear_smm_flag();
+
+	return cmd_status;
+}
+
+/*
+ * The MBOX_BIOS_CMD_SMM_INFO PSP mailbox command doesn't necessarily need be sent from SMM,
+ * but doing so allows the linker to sort out the addresses of c2p_buffer, p2c_buffer and
+ * smm_flag without us needing to pass this info between ramstage and smm. In the PSP gen2 case
+ * this will also make sure that the PSP MMIO base will be cached in SMM before the OS takes
+ * over so no SMN accesses will be needed during OS runtime.
+ */
 int psp_notify_smm(void)
 {
 	msr_t msr;
@@ -63,9 +91,7 @@ int psp_notify_smm(void)
 
 	printk(BIOS_DEBUG, "PSP: Notify SMM info... ");
 
-	set_smm_flag();
-	cmd_status = send_psp_command(MBOX_BIOS_CMD_SMM_INFO, &buffer);
-	clear_smm_flag();
+	cmd_status = send_psp_command_smm(MBOX_BIOS_CMD_SMM_INFO, &buffer);
 
 	/* buffer's status shouldn't change but report it if it does */
 	psp_print_cmd_status(cmd_status, &buffer.header);
@@ -93,9 +119,7 @@ void psp_notify_sx_info(u8 sleep_type)
 
 	buffer->sleep_type = sleep_type;
 
-	set_smm_flag();
-	cmd_status = send_psp_command(MBOX_BIOS_CMD_SX_INFO, buffer);
-	clear_smm_flag();
+	cmd_status = send_psp_command_smm(MBOX_BIOS_CMD_SX_INFO, buffer);
 
 	/* buffer's status shouldn't change but report it if it does */
 	psp_print_cmd_status(cmd_status, &buffer->header);
