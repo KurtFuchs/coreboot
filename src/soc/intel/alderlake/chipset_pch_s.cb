@@ -136,20 +136,20 @@ chip soc/intel/alderlake
 
 	register "power_limits_config[RPL_S_8161_95W_CORE]" = "{
 		.tdp_pl1_override = 95,
-		.tdp_pl2_override = 253,
-		.tdp_pl4 = 380,
+		.tdp_pl2_override = 188,
+		.tdp_pl4 = 293,
 	}"
 
 	register "power_limits_config[RPL_S_8161_125W_CORE]" = "{
 		.tdp_pl1_override = 125,
-		.tdp_pl2_override = 253,
-		.tdp_pl4 = 380,
+		.tdp_pl2_override = 188,
+		.tdp_pl4 = 293,
 	}"
 
 	register "power_limits_config[RPL_S_8161_150W_CORE]" = "{
 		.tdp_pl1_override = 125,
-		.tdp_pl2_override = 253,
-		.tdp_pl4 = 380,
+		.tdp_pl2_override = 188,
+		.tdp_pl4 = 293,
 	}"
 
 	register "power_limits_config[RPL_S_881_35W_CORE]" = "{
@@ -166,8 +166,8 @@ chip soc/intel/alderlake
 
 	register "power_limits_config[RPL_S_881_125W_CORE]" = "{
 		.tdp_pl1_override = 125,
-		.tdp_pl2_override = 253,
-		.tdp_pl4 = 380,
+		.tdp_pl2_override = 188,
+		.tdp_pl4 = 293,
 	}"
 
 	register "power_limits_config[RPL_S_681_35W_CORE]" = "{
@@ -208,14 +208,14 @@ chip soc/intel/alderlake
 
 	register "power_limits_config[RPL_S_801_80W_CORE]" = "{
 		.tdp_pl1_override = 80,
-		.tdp_pl2_override = 253,
-		.tdp_pl4 = 380,
+		.tdp_pl2_override = 188,
+		.tdp_pl4 = 293,
 	}"
 
 	register "power_limits_config[RPL_S_801_95W_CORE]" = "{
 		.tdp_pl1_override = 95,
-		.tdp_pl2_override = 253,
-		.tdp_pl4 = 380,
+		.tdp_pl2_override = 188,
+		.tdp_pl4 = 293,
 	}"
 
 	register "power_limits_config[RPL_S_401_35W_CORE]" = "{
