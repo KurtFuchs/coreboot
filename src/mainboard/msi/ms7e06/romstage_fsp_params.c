@@ -76,6 +76,7 @@ static void custom_fsp_parameters(FSPM_UPD *memupd)
 	memupd->FspmConfig.EnableAbove4GBMmio = 1;
 	memupd->FspmConfig.UnderVoltProtection = 1;
 	memupd->FspmConfig.VmxEnable = 1;
+	memupd->FspmConfig.OcSupport = 0;
 }
 
 void mainboard_memory_init_params(FSPM_UPD *memupd)
@@ -93,7 +94,9 @@ void mainboard_memory_init_params(FSPM_UPD *memupd)
 
 	memupd->FspmConfig.MmioSize = 0xb00; /* 2.75GB in MB */
 
-	memupd->FspmConfig.OcLock = 0;
+	memupd->FspmConfig.OcLock = 1;
+	memupd->FspmConfig.CpuRatioOverride = 0;
+	memupd->FspmConfig.FllOcModeEn = 0x0;
 	custom_fsp_parameters(memupd);
 
 	if (CONFIG(BOARD_MSI_Z790_P_PRO_WIFI_DDR4))
