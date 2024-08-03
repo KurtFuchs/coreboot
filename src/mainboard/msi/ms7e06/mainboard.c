@@ -65,6 +65,8 @@ static void custom_fsp_config(FSP_S_CONFIG *params)
 	params->AesEnable = 1;
 }
 
+/*
+// Disabled for now, thanks to Intel.
 
 static void fill_turbo_ratio_limits(FSP_S_CONFIG *params)
 {
@@ -86,6 +88,7 @@ static void fill_turbo_ratio_limits(FSP_S_CONFIG *params)
 	memcpy(&params->AtomTurboRatioLimitNumCore[0], &msr.lo, 4);
 	memcpy(&params->AtomTurboRatioLimitNumCore[4], &msr.hi, 4);
 }
+ */
 
 void mainboard_silicon_init_params(FSP_S_CONFIG *params)
 {
@@ -205,7 +208,8 @@ void mainboard_silicon_init_params(FSP_S_CONFIG *params)
 	 * If OcLock is not set in FSP-M UPD, FSP-S UPD will take and program
 	 * zeroed turbo ratio limits. Avoid this by populating default values here.
 	 */
-	fill_turbo_ratio_limits(params);
+	//TODO: Enable later when they fix their stuff.
+	//fill_turbo_ratio_limits(params);
 
 	// Add custom FSP Parameters
 	custom_fsp_config(params);
