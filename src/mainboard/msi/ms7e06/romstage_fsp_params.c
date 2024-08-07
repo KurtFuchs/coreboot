@@ -76,6 +76,10 @@ static void custom_fsp_parameters(FSPM_UPD *memupd)
 	memupd->FspmConfig.EnableAbove4GBMmio = 1;
 	memupd->FspmConfig.UnderVoltProtection = 1;
 	memupd->FspmConfig.VmxEnable = 1;
+	memupd->FspmConfig.ScramblerSupport=1;
+	memupd->FspmConfig.SpdProfileSelected=5;
+	memupd->FspmConfig.SaGv = 0;
+	memupd->FspmConfig.GearRatio = 2;
 }
 
 void mainboard_memory_init_params(FSPM_UPD *memupd)
