@@ -23,10 +23,6 @@
 [submodule "opensbi"]
 	path = 3rdparty/opensbi
 	url = https://review.coreboot.org/opensbi.git
-[submodule "intel-microcode"]
-	path = 3rdparty/intel-microcode
-	url = https://review.coreboot.org/intel-microcode.git
-	branch = main
 [submodule "3rdparty/ffs"]
 	path = 3rdparty/ffs
 	url = https://review.coreboot.org/ffs.git
@@ -57,3 +53,6 @@
 [submodule "3rdparty/dasharo-blobs"]
 	path = 3rdparty/dasharo-blobs
 	url = https://github.com/Dasharo/dasharo-blobs.git
+[submodule "3rdparty/intel-microcode"]
+	path = 3rdparty/intel-microcode
+	url = https://github.com/KurtFuchs/Intel-Linux-Processor-Microcode-Data-Files.git
